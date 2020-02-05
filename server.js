@@ -61,14 +61,35 @@ mongo.connect(process.env.DATABASE, (err, db) => {
       })
     );
 
-    app.route('/')
+  app.route('/')
   .get((req, res) => {
-    res.render(process.cwd() + "/views/pug/index.pug", {title: 'Hello', message:'Please login'});
+    res.render(process.cwd() + "/views/pug/index", {title: 'Home Page', message:'Please login', showLogin: true});
   });
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log("Listening on port " + process.env.PORT);
-});
+  app.listen(process.env.PORT || 3000, () => {
+    console.log("Listening on port " + process.env.PORT);
+  });
+
+  app.post('/login', passport.authenticate('local', {failureRedirect: '/'}), function(req, res) {
+      res.redirect('/profile');
+          //req.user
+    });
+
+    // app.get('/profile', ensureAuthenticated, function(req, res) {
+    //   res.render(process.cwd() + "/views/pug/profile");
+    // });
+  function ensureAuthenticated(req, res, next) {
+      if (req.isAuthenticated) {
+        return next();
+      }
+      res.redirect('/');
+    }
+
+  app.route('/profile')
+   .get(ensureAuthenticated, (req,res) => {
+      res.render(process.cwd() + '/views/pug/profile');
+   });
+
 
   }
 });
