@@ -9,6 +9,8 @@ const fccTesting  = require('./freeCodeCamp/fcctesting.js');
 const ObjectID    = db.ObjectID;
 const mongo       = require('mongodb').MongoClient;
 const LocalStrategy = require('passport-local');
+const bcrypt      = require('bcrypt');
+const saltRounds = 12;
 
 const app = express();
 
@@ -57,7 +59,8 @@ mongo.connect(process.env.DATABASE, (err, client) => {
          console.log('User ' + username + ' is trying to log in');
          if (err) {return done(err); }
          if (!user) {return done(null, false); }
-         if (password !== user.password) {return done(null, false); }
+         if (!bcrypt.compareSync(password, user.password)) {return done(null, false); }
+         //if (password !== user.password) {return done(null, false); }
          return done(null,user);
        });
       })
@@ -85,9 +88,10 @@ mongo.connect(process.env.DATABASE, (err, client) => {
         } else if (user) {
           res.redirect('/');
         } else {
+          let hash = bcrypt.hashSync(req.body.password, saltRounds);
           database.collection('users').insertOne({
             username: req.body.username,
-            password: req.body.password
+            password: hash
           },
           (err, user) => {
             if (err) {
