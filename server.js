@@ -20,7 +20,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set('view engine', 'pug');
 process.env.SESSION_SECRET=Math.random()*10000000;
-process.env.DATABASE='mongodb+srv://olena33:forGotTen33@cluster0-zfxvg.mongodb.net/test?retryWrites=true&w=majority';
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -61,34 +60,31 @@ mongo.connect(process.env.DATABASE, (err, db) => {
       })
     );
 
+
   app.route('/')
   .get((req, res) => {
     res.render(process.cwd() + "/views/pug/index", {title: 'Home Page', message:'Please login', showLogin: true});
   });
 
-  app.listen(process.env.PORT || 3000, () => {
-    console.log("Listening on port " + process.env.PORT);
-  });
-
   app.post('/login', passport.authenticate('local', {failureRedirect: '/'}), function(req, res) {
       res.redirect('/profile');
-          //req.user
-    });
-
-    // app.get('/profile', ensureAuthenticated, function(req, res) {
-    //   res.render(process.cwd() + "/views/pug/profile");
-    // });
-  function ensureAuthenticated(req, res, next) {
-      if (req.isAuthenticated) {
-        return next();
-      }
-      res.redirect('/');
-    }
+  });
 
   app.route('/profile')
    .get(ensureAuthenticated, (req,res) => {
       res.render(process.cwd() + '/views/pug/profile');
    });
+
+  app.listen(process.env.PORT || 3000, () => {
+    console.log("Listening on port " + process.env.PORT);
+  });
+
+    function ensureAuthenticated(req, res, next) {
+      if (req.isAuthenticated()) {
+        return next();
+      }
+      res.redirect('/');
+    };
 
 
   }
