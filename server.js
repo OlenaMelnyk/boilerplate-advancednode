@@ -1,4 +1,6 @@
 'use strict';
+const auth = require('./auth.js');
+const routes = require('./routes.js');
 
 const express     = require('express');
 const session     = require('express-session');
